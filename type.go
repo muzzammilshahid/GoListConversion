@@ -53,7 +53,35 @@ func main() {
 		}
 	}
 
-	for i := range testAfter {
-		fmt.Println("value =", testAfter[i], "type =", reflect.TypeOf(testAfter[i]))
+	//for i := range testAfter {
+	//	fmt.Println("value =", testAfter[i], ", type =", reflect.TypeOf(testAfter[i]))
+	//}
+
+	testingFunction := []string{"2", "3", "test", "7", "1.11", "false"}
+
+	for i := range listToTypedList(testingFunction) {
+		fmt.Println("value =", listToTypedList(testingFunction)[i], ", type =", reflect.TypeOf(listToTypedList(testingFunction)[i]))
 	}
+}
+
+func listToTypedList(args []string) []interface{} {
+
+	var convertedList []interface{}
+
+	for _, value := range args {
+		number, errNumber := strconv.Atoi(value)
+		float, errFloat := strconv.ParseFloat(value, 64)
+		boolean, errBoolean := strconv.ParseBool(value)
+		if errNumber == nil {
+			convertedList = append(convertedList, number)
+		} else if errFloat == nil {
+			convertedList = append(convertedList, float)
+		} else if errBoolean == nil {
+			convertedList = append(convertedList, boolean)
+		} else {
+			convertedList = append(convertedList, value)
+		}
+	}
+
+	return convertedList
 }
