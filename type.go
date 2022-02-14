@@ -19,8 +19,9 @@ func main() {
 }
 
 func listToTypedList(args []string) []interface{} {
-
 	var convertedList []interface{}
+	var mapJson map[string]interface{}
+	var mapList []map[string]interface{}
 
 	for _, value := range args {
 		if number, errNumber := strconv.Atoi(value); errNumber == nil {
@@ -29,32 +30,14 @@ func listToTypedList(args []string) []interface{} {
 			convertedList = append(convertedList, float)
 		} else if boolean, errBoolean := strconv.ParseBool(value); errBoolean == nil {
 			convertedList = append(convertedList, boolean)
-		} else if isJson(value) != nil {
-			convertedList = append(convertedList, isJson(value))
-		} else if isArray(value) != nil {
-			convertedList = append(convertedList, isArray(value))
+		} else if errJson := json.Unmarshal([]byte(value), &mapJson); errJson == nil {
+			convertedList = append(convertedList, mapJson)
+		} else if errList := json.Unmarshal([]byte(value), &mapList); errList == nil {
+			convertedList = append(convertedList, mapList)
 		} else {
 			convertedList = append(convertedList, value)
 		}
 	}
 
 	return convertedList
-}
-
-func isJson(str string) map[string]interface{} {
-	var mapList map[string]interface{}
-	err := json.Unmarshal([]byte(str), &mapList)
-	if mapList != nil && err == nil {
-		return mapList
-	}
-	return nil
-}
-
-func isArray(str string) []map[string]interface{} {
-	var mapList []map[string]interface{}
-	err := json.Unmarshal([]byte(str), &mapList)
-	if mapList != nil && err == nil {
-		return mapList
-	}
-	return nil
 }
