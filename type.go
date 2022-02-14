@@ -69,14 +69,11 @@ func listToTypedList(args []string) []interface{} {
 	var convertedList []interface{}
 
 	for _, value := range args {
-		number, errNumber := strconv.Atoi(value)
-		float, errFloat := strconv.ParseFloat(value, 64)
-		boolean, errBoolean := strconv.ParseBool(value)
-		if errNumber == nil {
+		if number, errNumber := strconv.Atoi(value); errNumber == nil {
 			convertedList = append(convertedList, number)
-		} else if errFloat == nil {
+		} else if float, errFloat := strconv.ParseFloat(value, 64); errFloat == nil {
 			convertedList = append(convertedList, float)
-		} else if errBoolean == nil {
+		} else if boolean, errBoolean := strconv.ParseBool(value); errBoolean == nil {
 			convertedList = append(convertedList, boolean)
 		} else {
 			convertedList = append(convertedList, value)
