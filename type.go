@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -11,7 +9,9 @@ import (
 
 func main() {
 
-	testingFunction := []string{"2", "3", "test", "7", "1.11", "false", "{\"number\":1356,\"id\":\"1\",\"name\":\"test\"}"}
+	testingFunction := []string{"2", "3", "test", "7", "1.11", "false",
+		"[{\"number\":1356,\"id\":\"1\",\"name\":\"test\"}]",
+		"{\"number\":1356,\"id\":\"1\",\"name\":\"test\"}", "true", "21", "1.25", "OK"}
 
 	for i := range listToTypedList(testingFunction) {
 		fmt.Println("value =", listToTypedList(testingFunction)[i], ", type =", reflect.TypeOf(listToTypedList(testingFunction)[i]))
@@ -29,15 +29,10 @@ func listToTypedList(args []string) []interface{} {
 			convertedList = append(convertedList, float)
 		} else if boolean, errBoolean := strconv.ParseBool(value); errBoolean == nil {
 			convertedList = append(convertedList, boolean)
-		} else if isValidJSON(value) {
-			var jsonMap map[string]interface{}
-			data, err := getBytes(value)
-			if err != nil {
-				panic(err.Error())
-			}
-			data = data[4:]
-			err = json.Unmarshal(data, &jsonMap)
-			convertedList = append(convertedList, jsonMap)
+		} else if isJson(value) != nil {
+			convertedList = append(convertedList, isJson(value))
+		} else if isArray(value) != nil {
+			convertedList = append(convertedList, isArray(value))
 		} else {
 			convertedList = append(convertedList, value)
 		}
@@ -46,23 +41,20 @@ func listToTypedList(args []string) []interface{} {
 	return convertedList
 }
 
-func isValidJSON(i interface{}) bool {
-	var str map[string]interface{}
-	data, err := getBytes(i)
-	if err != nil {
-		panic(err.Error())
+func isJson(str string) map[string]interface{} {
+	var mapList map[string]interface{}
+	err := json.Unmarshal([]byte(str), &mapList)
+	if mapList != nil && err == nil {
+		return mapList
 	}
-	data = data[4:]
-	err = json.Unmarshal(data, &str)
-	return err == nil
+	return nil
 }
 
-func getBytes(i interface{}) ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(i)
-	if err != nil {
-		return nil, err
+func isArray(str string) []map[string]interface{} {
+	var mapList []map[string]interface{}
+	err := json.Unmarshal([]byte(str), &mapList)
+	if mapList != nil && err == nil {
+		return mapList
 	}
-	return buf.Bytes(), nil
+	return nil
 }
